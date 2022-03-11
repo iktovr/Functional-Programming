@@ -1,0 +1,108 @@
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+\usepackage{multicol,multirow}
+\usepackage{tabularx}
+\usepackage{ulem}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{titlesec}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection.}{0.3em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection.}{0.3em}{}
+
+\titlespacing{\section}{0pt}{*2}{*2}
+\titlespacing{\subsection}{0pt}{*1}{*1}
+\titlespacing{\subsubsection}{0pt}{*0}{*0}
+\usepackage{listings}
+\lstloadlanguages{Lisp}
+\lstset{extendedchars=false,
+	breaklines=true,
+	breakatwhitespace=true,
+	keepspaces = true,
+	tabsize=2
+}
+
+\begin{document}
+
+\section*{Отчет по лабораторной работе №\,1 \\
+по курсу \guillemotleft  Функциональное программирование\guillemotright}
+\begin{flushright}
+Студент группы 8О-307 МАИ \textit{Бирюков Виктор}, \textnumero 2 по списку \\
+\makebox[7cm]{Контакты: {\tt vikvladbir@mail.ru} \hfill} \\
+\makebox[7cm]{Работа выполнена: 11.03.2022 \hfill} \\
+\ \\
+Преподаватель: Иванов Дмитрий Анатольевич, доц. каф. 806 \\
+\makebox[7cm]{Отчет сдан: \hfill} \\
+\makebox[7cm]{Итоговая оценка: \hfill} \\
+\makebox[7cm]{Подпись преподавателя: \hfill} \\
+
+\end{flushright}
+
+\section{Тема работы}
+Примитивные функции и особые операторы Коммон Лисп.
+
+\section{Цель работы}
+Научиться вводить S-выражения в Лисп-систему, определять переменные и функции, работать с условными операторами, работать с числами, используя схему линейной и древовидной рекурсии.
+
+\section{Задание (вариант №1.45)}
+С помощью формулы $((x / y^2 + 2*y) / 3)$ запрограммируйте на языке Коммон Лисп функцию для вычисления кубического корня. Причем $y$ является приближением к кубическому корню из $x$.
+
+Использовать функции {\tt good-enough-p}, {\tt improve} и {\tt cube}.
+
+\section{Оборудование студента}
+Процессор AMD Ryzen 7 3700U\,@\,2.3GHz, память: 20Gb, разрядность системы: 64.
+
+\section{Программное обеспечение}
+ОС Windows 10, компилятор SBCL 2.2.2, текстовый редактор Sublime Text 4.
+
+\section{Идея, метод, алгоритм}
+Функция {\tt cuberoot-iter} вычисляет значение кубического корня методом Ньютона. Приближённое значение проверяется на близость к реальному при помощи предиката {\tt good-enough-p}, если оно недостаточно близко, происходит рекурсивный вызов {\tt cuberoot-iter} со значением, улучшенным функцией {\tt improve}.
+
+В качестве начального приближения используется {\tt 1.0}.
+
+Точность вычислений задается константой {\tt eps}.
+
+\section{Сценарий выполнения работы}
+
+\section{Распечатка программы и её результаты}
+
+\subsection{Исходный код}
+\lstinputlisting{./lab1.lisp}
+
+\subsection{Результаты работы}
+\begin{lstlisting}
+* (cuberoot 27.0)
+3.0000007
+
+* (cuberoot 8.0)
+2.000005
+
+* (cuberoot 125.0)
+5.0
+
+* (cuberoot (cube 127))
+127.0
+\end{lstlisting}
+
+\section{Дневник отладки}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Дата & Событие & Действие по исправлению & Примечание \\
+\hline
+\end{tabular}
+
+\section{Замечания автора по существу работы}
+
+Метод Ньютона позволяет довольно быстро найти значение кубического корня с заданной точностью. Однако могут возникнуть проблемы при работе с числами с плавающей точкой. Так, например, на моем устройстве программа не может найти $\sqrt[3]{5}$ c точностью $10^{-7}$
+
+\section{Выводы}
+В ходе выполнения лабораторной работы я познакомился с основами языка CommonLisp и реализацией простейших функций.
+
+\end{document}
