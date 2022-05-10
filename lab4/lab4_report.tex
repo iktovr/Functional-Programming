@@ -1,0 +1,194 @@
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+\usepackage{multicol,multirow}
+\usepackage{tabularx}
+\usepackage{ulem}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{libertine}
+\renewcommand{\ttdefault}{cmtt}
+
+\usepackage{titlesec}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection.}{0.3em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection.}{0.3em}{}
+
+\titlespacing{\section}{0pt}{*2}{*2}
+\titlespacing{\subsection}{0pt}{*1}{*1}
+\titlespacing{\subsubsection}{0pt}{*0}{*0}
+\usepackage{listings}
+\lstloadlanguages{Lisp}
+\lstset{extendedchars=false,
+	breaklines=true,
+	breakatwhitespace=true,
+	keepspaces = true,
+	tabsize=2
+}
+
+\begin{document}
+
+\section*{Отчет по лабораторной работе №\,4 \\
+по курсу \guillemotleft  Функциональное программирование\guillemotright}
+\begin{flushright}
+Студент группы 8О-307 МАИ \textit{Бирюков Виктор}, \textnumero 2 по списку \\
+\makebox[7cm]{Контакты: {\tt vikvladbir@mail.ru} \hfill} \\
+\makebox[7cm]{Работа выполнена: 10.05.2022 \hfill} \\
+\ \\
+Преподаватель: Иванов Дмитрий Анатольевич, доц. каф. 806 \\
+\makebox[7cm]{Отчет сдан: \hfill} \\
+\makebox[7cm]{Итоговая оценка: \hfill} \\
+\makebox[7cm]{Подпись преподавателя: \hfill} \\
+
+\end{flushright}
+
+\section{Тема работы}
+Знаки и строки.
+
+\section{Цель работы}
+Научиться работать с литерами (знаками) и строками при помощи функций обработки строк и общих функций работы с последовательностями.
+
+\section{Задание (вариант №4.38)}
+Запрограммировать на языке Коммон Лисп функцию, принимающую один аргумент --- натуральное число $n$, $n < 1000000$.
+Функция должна вернуть предложение, которое выражает это число русскими словами.
+
+\section{Оборудование студента}
+Процессор AMD Ryzen 7 3700U\,@\,2.3GHz, память: 20Gb, разрядность системы: 64.
+
+\section{Программное обеспечение}
+ОС Windows 10, компилятор SBCL 2.2.2, текстовый редактор Sublime Text 4.
+
+\section{Идея, метод, алгоритм}
+Структура количественных числительных в русском языке такова, что цифры числа можно обрабатывать группами по три, при необходимости вставляя после такой группы слова <<тысяча>>, <<миллион>> и т.д.
+
+В пределах группы каждый разряд представляется одним словом, за исключением чисел $11 - 19$, которые обозначаются одним словом на два разряда.
+
+Поправка на падеж нужна в двух случаях. Существует три варианта написания трехразрядных слов --- <<тысяча>> для $1$, <<тысячи>> для $2-4$, <<тысяч>> для $0$, $5-9$, а также $11-19$. Миллионы и более аналогично. Также для тысяч менятся написание: <<один>> --- на <<одна>>, <<два>> --- на <<две>>.
+
+Все необходимые константы записаны в шесть глобальных массивов. Обработку трехзначных групп осуществляет функция {\tt three-digits-sentence}. Обработку всего числа --- функция {\tt number-sentence-iter}, которая описывает линейно-итеративный процесс. Таким образом, сложность алгоритма по времени --- $O(\log_{1000}{n})$
+
+\section{Сценарий выполнения работы}
+
+\section{Распечатка программы и её результаты}
+
+\subsection{Исходный код}
+\begin{lstlisting}[escapechar=\%, basicstyle=\footnotesize]
+; 4.38
+
+(defvar *digits* #(%"один"% %"два"% %"три"% %"четыре"% %"пять"% %"шесть"% %"семь"% %"восемь"% %"девять"%))
+(defvar *digits-for-thousand* #(%"одна"% %"две"%))
+(defvar *two-digits* #(%"одиннадцать"% %"двенадцать"% %"тринадцать"% %"четырнадцать"% %"пятнадцать"% %"шестнадцать"% %"семнадцать"% %"восемнадцать"% %"девятнадцать"%))
+(defvar *tens* #(%"десять"% %"двадцать"% %"тридцать"% %"сорок"% %"пятьдесят"% %"шестьдесят"% %"семьдесять"% %"восемьдесят"% %"девяносто"%))
+(defvar *hundreds* #(%"сто"% %"двести"% %"триста"% %"четыреста"% %"пятьсот"% %"шестьсот"% %"семьсот"% %"восемьсот"% %"девятьсот"%))
+(defvar *case* #(#(%"тысяча"% %"тысячи"% %"тысяч"%) #(%"миллион"% %"миллиона"% %"миллионов"%)))
+
+(defun three-digits-sentence (num pos)
+    (let ((res NIL))
+        (if (= num 0)
+            res
+            (let 
+                ((digit (mod num 10))
+                (ten (mod (floor num 10) 10))
+                (hundred (mod (floor num 100) 10)))
+
+                (if (/= hundred 0) ; 100 - 900
+                    (setq res (concatenate 'string 
+                                  res 
+                                  (svref *hundreds* (1- hundred)) 
+                                  " ")))
+
+                (if (and (= ten 1) (/= digit 0)) ; 11 - 19
+                    (setq res (concatenate 'string 
+                                  res 
+                                  (svref *two-digits* (1- digit)) 
+                                  " "))
+                    (progn 
+                        (if (/= ten 0) ; 10 - 90
+                            (setq res (concatenate 'string 
+                                          res 
+                                          (svref *tens* (1- ten)) 
+                                          " ")))
+                        (cond
+                            ((and (/= digit 0) 
+                                  (or (/= pos 1) (> digit 2))) ; 1 - 9
+                                (setq res (concatenate 'string 
+                                              res 
+                                              (svref *digits* (1- digit)) 
+                                              " ")))
+                            ((/= digit 0) ; 1 - 2 thousand
+                                (setq res (concatenate 'string 
+                                              res 
+                                              (svref *digits-for-thousand* 
+                                                     (1- digit)) 
+                                              " "))))))
+                
+                (if (> pos 0)
+                    (cond
+                        ((or (= digit 0) (= ten 1) (> digit 4)) 
+                            (setq res (concatenate 'string 
+                                          res 
+                                          (svref (svref *case* (1- pos)) 2) 
+                                          " ")))
+                        ((= digit 1) 
+                            (setq res (concatenate 'string 
+                                          res 
+                                          (svref (svref *case* (1- pos)) 0) 
+                                          " ")))
+                        (T 
+                            (setq res (concatenate 'string 
+                                          res 
+                                          (svref (svref *case* (1- pos)) 1) 
+                                          " ")))))
+                res))))
+
+(defun number-sentence-iter (num pos res)
+    (if (= num 0)
+        res
+        (number-sentence-iter
+            (floor num 1000)
+            (1+ pos)
+            (concatenate 'string
+                (three-digits-sentence (mod num 1000) pos)
+                res))))
+
+(defun number-sentence (num)
+    (string-right-trim " " (number-sentence-iter num 0 NIL)))
+\end{lstlisting}
+
+\subsection{Результаты работы}
+\begin{lstlisting}[escapechar=\%]
+* (number-sentence 3967)
+%"три тысячи девятьсот шестьдесят семь"%
+
+* (number-sentence 1004012)
+%"один миллион четыре тысячи двенадцать"%
+
+* (number-sentence 925101503)
+%"девятьсот двадцать пять миллионов сто одна тысяча пятьсот три"%
+
+* (number-sentence 143054637)
+%"сто сорок три миллиона пятьдесят четыре тысячи шестьсот тридцать семь"%
+
+* (number-sentence 999999999)
+%"девятьсот девяносто девять миллионов девятьсот девяносто девять тысяч девятьсот девяносто девять"%
+\end{lstlisting}
+
+\section{Дневник отладки}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Дата & Событие & Действие по исправлению & Примечание \\
+\hline
+\end{tabular}
+
+\section{Замечания автора по существу работы}
+Так как кроме тысяч исключений больше нет, величина обрабатываемых чисел может быть увеличена путем расширения массива {\tt *case*}.
+
+\section{Выводы}
+В ходе выполнения лабораторной работы я познакомился со строками и последовательностями в языке Коммон Лисп, а также с функциями для их обработки. 
+\end{document}
