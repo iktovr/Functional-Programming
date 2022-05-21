@@ -1,0 +1,132 @@
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+\usepackage{multicol,multirow}
+\usepackage{tabularx}
+\usepackage{ulem}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{libertine}
+\renewcommand{\ttdefault}{cmtt}
+
+\usepackage{titlesec}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection.}{0.3em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection.}{0.3em}{}
+
+\titlespacing{\section}{0pt}{*2}{*2}
+\titlespacing{\subsection}{0pt}{*1}{*1}
+\titlespacing{\subsubsection}{0pt}{*0}{*0}
+\usepackage{listings}
+\lstloadlanguages{Lisp}
+\lstset{extendedchars=false,
+	breaklines=true,
+	breakatwhitespace=true,
+	keepspaces = true,
+	tabsize=2
+}
+
+\begin{document}
+
+\section*{Отчет по лабораторной работе №\,5 \\
+по курсу \guillemotleft  Функциональное программирование\guillemotright}
+\begin{flushright}
+Студент группы 8О-307 МАИ \textit{Бирюков Виктор}, \textnumero 2 по списку \\
+\makebox[7cm]{Контакты: {\tt vikvladbir@mail.ru} \hfill} \\
+\makebox[7cm]{Работа выполнена: 21.05.2022 \hfill} \\
+\ \\
+Преподаватель: Иванов Дмитрий Анатольевич, доц. каф. 806 \\
+\makebox[7cm]{Отчет сдан: \hfill} \\
+\makebox[7cm]{Итоговая оценка: \hfill} \\
+\makebox[7cm]{Подпись преподавателя: \hfill} \\
+
+\end{flushright}
+
+\section{Тема работы}
+Обобщённые функции, методы и классы объектов.
+
+\section{Цель работы}
+Научиться определять простейшие классы, порождать экземпляры классов, считывать и изменять значения слотов, научиться определять обобщённые функции и методы.
+
+\section{Задание (вариант №5.43)}
+Определите обычную функцию {\tt der-polynom} с одним параметром --- многочленом, т.е. экземпляром класса {\tt polynom}.
+
+Функция должна вычислять производную $P'(x)$.
+
+\section{Оборудование студента}
+Процессор AMD Ryzen 7 3700U\,@\,2.3GHz, память: 20Gb, разрядность системы: 64.
+
+\section{Программное обеспечение}
+ОС Windows 10, LispWorks Personal Edition 7.1.2.
+
+\section{Идея, метод, алгоритм}
+Известно, что производная степени $\frac{d x^n}{d x} = n x^{n-1}$, $n \neq 0$, в то время как $\frac{d x^0}{d x} = \frac{d 1}{d x} = 0$. Таким образом дифференцирование многочлена происходит по следующей схеме:
+
+\begin{itemize}
+\setlength{\itemsep}{-1mm}
+\item терм вида $a x^n$, $n > 0$ становится термом $a n \cdot x^{n-1}$
+\item терм, соответствующий свободному члену, удаляется.
+\end{itemize}
+
+Эту операцию над списком термов осуществляет функция {\tt der-terms}. Функция {\tt der-polynom} создает новый многочлен с тем же символом и измененными термами.
+
+\section{Сценарий выполнения работы}
+
+\section{Распечатка программы и её результаты}
+
+\subsection{Исходный код}
+\lstinputlisting{./lab5.lisp}
+
+\subsection{Результаты работы}
+\begin{lstlisting}[escapechar=\%]
+CL-USER 1 > (setq p (make-instance 'polynom
+          :var 'x
+          :terms (list (make-term :order 2 :coeff 5)
+                       (make-term :order 1 :coeff 3.3)
+                       (make-term :order 0 :coeff -7))))
+[%МЧ% (X) +5X^2+3.3X-7]
+
+CL-USER 2 > (der-polynom p)
+[%МЧ% (X) +10X+3.3]
+
+CL-USER 3 > (der-polynom (der-polynom p))
+[%МЧ% (X) +10]
+
+CL-USER 4 > (der-polynom (der-polynom (der-polynom p)))
+[%МЧ% (X) ]
+
+CL-USER 5 > (setq p (make-instance 'polynom
+          :var 'x
+          :terms (list (make-term :order 100 :coeff 1))))
+[%МЧ% (X) +1X^100]
+
+CL-USER 6 > (der-polynom p)
+[%МЧ% (X) +100X^99]
+
+CL-USER 7 > (der-polynom (der-polynom p))
+[%МЧ% (X) +9900X^98]
+
+CL-USER 8 > (der-polynom (der-polynom (der-polynom p)))
+[%МЧ% (X) +970200X^97]
+\end{lstlisting}
+
+\section{Дневник отладки}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Дата & Событие & Действие по исправлению & Примечание \\
+\hline
+\end{tabular}
+
+\section{Замечания автора по существу работы}
+В данной работе я решил использовать {\tt loop} вместо явной рекурсии и это оказалось несколько проще. Сложность алгоритма --- $O(n)$, где $n$ --- количество термов.
+
+\section{Выводы}
+В ходе выполнения лабораторной работы я познакомился с созданием простейших классов, а также с реализацией функций для их обработки.
+
+\end{document}
